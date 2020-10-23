@@ -1,0 +1,22 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "serve": "nodemon src/",
+    "lint": "tslint -p tsconfig.json",
+    "migrate": "node src/database/migration"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "pg": "^8.4.1",
+    "sequelize": "^6.3.5"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.2",
+    "nodemon": "^2.0.6",
+    "typescript": "^4.0.3"
+  }
+}
