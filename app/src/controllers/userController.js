@@ -1,6 +1,9 @@
 const User = require('./../models/user')
 const { Op } = require("sequelize");
 const Validator = require('validatorjs')
+const Service = require('./../services/authService')
+
+const AuthService = new Service()
 
 
 class UserController {
@@ -18,37 +21,13 @@ class UserController {
         })
 
         if(isValid.passes()) {
-            // looking for existing user
-            let user = await User.findOne({
-                where: {
-                    [Op.or]: {
-                        email: req.body.email,
-                        name: req.body.name
-                    }
-                }
-            })
-
-            if(!user) {
-                // creating a new user
-                User.create({
-                    name: req.body.name,
-                    password: req.body.password,
-                    email: req.body.email
-                })
-                    .then(result => res.status(201).json({
-                        'status': 'ok',
-                        'payload': result
-                    }))
-                    .catch(err => res.status(400).json({'errors': {'server': ['An error occurred on the server.']}}))
-
-            } else {
-                // error, user exists
-                res.status(400).json({'errors': {'exist': ['User already exists.']}})
-            }
-
-        } else { // отправляем ошибки
+            /*let result = await AuthService.register(req.body.name, req.body.email, req.body.password)
+            res.status(result.code).json(result)*/
+            res.send(await AuthService.verificationEmail(req.body.email))
+        } else { // send validation errors
             res.status(400).json(isValid.errors)
         }
+
     }
 }
 
