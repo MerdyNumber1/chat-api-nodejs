@@ -6,8 +6,7 @@ const mailer = require('./../config/mail')
 
 
 class AuthService {
-    async register(name, email ,password) {
-        // looking for existing user
+    async isUserExist(name, email) {
         let user = await User.findOne({
             where: {
                 [Op.or]: {
@@ -16,9 +15,12 @@ class AuthService {
                 }
             }
         })
-
+        return !!user
+    }
+    async register(name, email ,password) {
+        // looking for existing user
         let response = {}
-        if(!user) {
+        if(!await this.isUserExist(name, email)) {
             // creating a new user
             try {
                 let user = await User.create({
@@ -46,27 +48,27 @@ class AuthService {
 
         if(!code) { // if we have to sent ver. code
 
-            if (await redis.asyncGetRedis(`emailVerification:${email}`)) { // if verification code sent
+            if (await redis.asyncGet(`emailVerification:${email}`)) { // if verification code sent
                 response = {code: 400, errors: {'verificationEmail': 'Confirmation code already sent.'}}
             } else {
-                let code = randomInt(1, 10000)
+                let code = randomInt(1000, 9999)
                 await mailer.sendMail({
                     from: 'Chat',
                     to: email,
                     subject: 'Verification code for registration in chat',
                     text: `Your verification code is - ${code}`,
                 })
-                await redis.asyncSetRedis(`emailVerification:${email}`, code, 'EX', 5 * 60)
+                await redis.asyncSet(`emailVerification:${email}`, code, 'EX', 5 * 60)
                 response = {code: 200, payload: 'Confirmation code sent.'}
             }
 
         } else { // if we have to confirm ver. code
 
-            let serverCode = await redis.asyncGetRedis(`emailVerification:${email}`)
+            let serverCode = await redis.asyncGet(`emailVerification:${email}`)
 
-            if (await redis.asyncGetRedis(`emailVerification:${email}`)) {
+            if (await redis.asyncGet(`emailVerification:${email}`)) {
 
-                if(serverCode === code) {
+                if(serverCode == code) {
                     response = {code: 200, payload: 'Verification code confirmed.'}
                 } else {
                     response = {code: 400, errors: {'verificationEmail': 'Verification code does not match.'}}
