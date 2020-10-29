@@ -8,4 +8,4 @@ sequelize.sync({
         console.log('Migration is completed')
         process.exit()
     })
-    .catch(err=> console.log(err))
+    .catch(err => console.log(err))
