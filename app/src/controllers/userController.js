@@ -2,6 +2,7 @@ const User = require('./../models/user')
 const { Op } = require("sequelize");
 const Validator = require('validatorjs')
 const Service = require('./../services/authService')
+const escape = require('escape-html')
 
 const AuthService = new Service()
 
@@ -9,7 +10,7 @@ const AuthService = new Service()
 class UserController {
     async create(req, res) {
         const {name, email, password} = req.body
-
+        console.log(name, email, password)
         // validation
         const isValid = new Validator({
             name,
@@ -22,7 +23,7 @@ class UserController {
         })
 
         if(isValid.passes()) {
-            let response = await AuthService.register(name, email, password)
+            let response = await AuthService.register(escape(name), email, password)
             res.status(response.code).json(response)
         } else { // send validation errors
             res.status(400).json({
