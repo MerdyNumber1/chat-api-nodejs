@@ -101,7 +101,7 @@ class AuthService {
         })
         if(await bcrypt.compare(password, user.password)) {
             const token = jwt.sign({id: user.id}, process.env.APP_SECRET_KEY)
-            response = {code: 200, payload: {token}}
+            response = {code: 200, token}
         } else {
             response = {code: 400, error: 'Passwords dont match'}
         }
