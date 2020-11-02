@@ -36,7 +36,7 @@ class AuthService {
             // sending verification
             response = await this.sendVerificationCode(email)
         } else {
-            response = {errors: {exist: ['User already exists.']}, code: 400}
+            response = {error: 'User already exists.', code: 400}
         }
 
         return response
@@ -46,7 +46,7 @@ class AuthService {
         let response
 
         if (await redis.asyncGet(`emailVerification:${email}`)) { // if verification code sent
-            response = {code: 400, errors: {verificationEmail: 'Confirmation code already sent.'}}
+            response = {code: 400, error: 'Confirmation code already sent.'}
         } else {
             let code = randomInt(1000, 9999)
             await mailer.sendMail({
@@ -74,10 +74,10 @@ class AuthService {
                 })
                 response = {code: 200, payload: 'User confirmed.'}
             } else {
-                response = {code: 400, errors: {verificationEmail: 'Verification code does not match.'}}
+                response = {code: 400, error: 'Verification code does not match.'}
             }
         } else {
-            response = {code: 400, errors: {verificationEmail: 'Confirmation code expired or did not send.'}}
+            response = {code: 400, error: 'Confirmation code expired or did not send.'}
         }
 
         return response
@@ -92,7 +92,7 @@ class AuthService {
             const token = jwt.sign({id: user.id}, process.env.APP_SECRET_KEY)
             response = {code: 200, payload: {token}}
         } else {
-            response = {code: 400, errors: {authError: 'Passwords dont match'}}
+            response = {code: 400, error: 'Passwords dont match'}
         }
         return response
     }

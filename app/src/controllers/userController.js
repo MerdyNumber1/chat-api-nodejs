@@ -8,6 +8,7 @@ const AuthService = new Service()
 
 class UserController {
     async create(req, res) {
+        console.log(req.body.name, req.body.email, req.body.password)
         const {name, email, password} = req.body
 
         // validation
@@ -25,7 +26,11 @@ class UserController {
             let response = await AuthService.register(name, email, password)
             res.status(response.code).json(response)
         } else { // send validation errors
-            res.status(400).json(isValid.errors)
+            res.status(400).json({
+                error: isValid.errors.first('email') ||
+                    isValid.errors.first('name') ||
+                    isValid.errors.first('password')
+            })
         }
     }
 
@@ -44,7 +49,8 @@ class UserController {
             let response = await AuthService.confirmUser(email, code)
             res.status(response.code).json(response)
         } else { // send validation errors
-            res.status(400).json(isValid.errors)
+            res.status(400).json(isValid.errors.first('email') ||
+                isValid.errors.first('code'))
         }
     }
 

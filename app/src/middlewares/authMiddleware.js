@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 const User = require('./../models/user')
 
 function authMiddleware(req, res, next) {
+    req.user = null
     if(req.headers.authorization) {
         jwt.verify(
             req.headers.authorization.split(' ')[1],
