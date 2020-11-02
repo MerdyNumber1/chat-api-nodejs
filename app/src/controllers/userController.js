@@ -8,7 +8,6 @@ const AuthService = new Service()
 
 class UserController {
     async create(req, res) {
-        console.log(req.body.name, req.body.email, req.body.password)
         const {name, email, password} = req.body
 
         // validation

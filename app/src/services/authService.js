@@ -20,17 +20,25 @@ class AuthService {
         })
         return !!user
     }
+    async isUserConfirmed(email) {
+        let user = await User.findOne({
+            where: {
+                email: email,
+                confirmed: true
+            }
+        })
+        return !!user
+    }
 
     async register(name, email, password) {
         let response
 
         // creating a new user
-
         if (!await this.isUserExist(name, email)) {
             await User.create({
-                name: name,
+                name,
                 password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
-                email: email,
+                email,
                 confirmed: false,
             })
             // sending verification
@@ -53,7 +61,7 @@ class AuthService {
                 from: 'Chat',
                 to: email,
                 subject: 'Verification code for registration in chat',
-                text: `Your verification code is - ${code}`,
+                text: `Link for confirm your account - ${process.env.APP_CLIENT_URL}/auth/confirm?email=${email}&code=${code}`,
             })
             await redis.asyncSet(`emailVerification:${email}`, code, 'EX', 5 * 60)
             response = {code: 200, payload: 'Confirmation code sent.'}
@@ -65,19 +73,22 @@ class AuthService {
     async confirmUser(email, code) {
         let response
 
-        const serverCode = await redis.asyncGet(`emailVerification:${email}`)
-
-        if (serverCode) {
-            if(parseInt(serverCode) === parseInt(code)) {
-                await User.update({confirmed: true}, {
-                    where: {email}
-                })
-                response = {code: 200, payload: 'User confirmed.'}
+        if (!await this.isUserConfirmed(email)) {
+            const serverCode = await redis.asyncGet(`emailVerification:${email}`)
+            if (serverCode) {
+                if (parseInt(serverCode) === parseInt(code)) {
+                    await User.update({confirmed: true}, {
+                        where: {email}
+                    })
+                    response = {code: 200, payload: 'User confirmed.'}
+                } else {
+                    response = {code: 400, error: 'Verification code does not match.'}
+                }
             } else {
-                response = {code: 400, error: 'Verification code does not match.'}
+                response = {code: 400, error: 'Confirmation code expired or did not send.'}
             }
         } else {
-            response = {code: 400, error: 'Confirmation code expired or did not send.'}
+            response = {error: 'User already exists.', code: 400}
         }
 
         return response
