@@ -5,27 +5,35 @@ const User = require('./../models/user')
 
 const clients = []
 
-io.on('connection', socket => {
-
-    if(socket.request.headers.authorization) {
+io.use((socket, next) => {
+    socket.user = null
+    if(socket.handshake.query['token']) {
         jwt.verify(
-            socket.request.headers.authorization.split(' ')[1],
+            '12312321',
             process.env.APP_SECRET_KEY,
             async (err, payload) => {
                 if (payload) {
                     let user = await User.findByPk(payload.id)
                     if (user) {
-                        clients.push({sid: socket.id, uid: socket.user.id})
+                        clients.push({sid: socket.id, uid: user.id})
+                        console.log(1)
+                        next()
                         return
                     }
                 }
-                socket.close()
+                socket.emit('auth_error', 'Authentication error')
+                socket.disconnect()
             }
         )
     } else {
-        socket.close()
-        return
+        console.log(3)
+        socket.emit('auth_error', 'Authentication error')
+        socket.disconnect()
     }
+})
+
+io.of('/chat').on('connection', socket => {
+    console.log('connected')
 
     socket.emit('message', "I'm server")
 
@@ -39,6 +47,4 @@ io.on('connection', socket => {
     })
 })
 
-server.listen(process.env.APP_SOCKET_PORT, () => {
-    console.log(`Socket server started at http://localhost:${process.env.APP_SOCKET_PORT}`)
-})
+module.exports = server
