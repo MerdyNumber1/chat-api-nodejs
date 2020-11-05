@@ -9,7 +9,7 @@ io.use((socket, next) => {
     socket.user = null
     if(socket.handshake.query['token']) {
         jwt.verify(
-            '12312321',
+            socket.handshake.query['token'],
             process.env.APP_SECRET_KEY,
             async (err, payload) => {
                 if (payload) {
@@ -21,6 +21,7 @@ io.use((socket, next) => {
                         return
                     }
                 }
+                console.log(2)
                 socket.emit('auth_error', 'Authentication error')
                 socket.disconnect()
             }
