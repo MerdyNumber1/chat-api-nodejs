@@ -22,6 +22,6 @@ function noAuthMiddleware(req, res, next)  {
 userRouter.post('/',  noAuthMiddleware, (req, res) => UserController.create(req, res))
 userRouter.post('/confirm', noAuthMiddleware, (req, res) => UserController.confirmUser(req, res))
 userRouter.post('/auth', noAuthMiddleware, (req, res) => UserController.auth(req, res))
-userRouter.get('/current', (req, res) => UserController.getCurrent(req, res))
+userRouter.get('/me', (req, res) => UserController.getCurrent(req, res))
 
 module.exports = userRouter

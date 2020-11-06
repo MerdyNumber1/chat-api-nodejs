@@ -10,7 +10,6 @@ const AuthService = new Service()
 class UserController {
     async create(req, res) {
         const {name, email, password} = req.body
-        console.log(name, email, password)
         // validation
         const isValid = new Validator({
             name,

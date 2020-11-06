@@ -5,8 +5,6 @@ const redis = require('./../config/redis')
 const mailer = require('./../config/mail')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const isObjectEmpty = require('./../utils/isObjectEmpty')
-
 
 class AuthService {
 
@@ -19,7 +17,7 @@ class AuthService {
                 }
             }
         })
-        return !isObjectEmpty(user)
+        return !!user
     }
     async isUserConfirmed(email) {
         let user = await User.findOne({
@@ -101,7 +99,7 @@ class AuthService {
             where: {email}
         })
 
-        if(!isObjectEmpty(user)) {
+        if(user) {
             if (await bcrypt.compare(password, user.password)) {
                 const token = jwt.sign({id: user.id}, process.env.APP_SECRET_KEY)
                 response = {code: 200, token}

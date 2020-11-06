@@ -3,6 +3,9 @@ const io = require('socket.io')(server)
 const jwt = require('jsonwebtoken')
 const User = require('./../models/user')
 const moment = require('moment')
+const Controller = require('./../controllers/messageController')
+
+const MessageController = new Controller()
 
 const clients = []
 
@@ -19,7 +22,8 @@ io.use(async (socket, next) => {
                         clients.push({
                             sid: socket.id,
                             name: user.name,
-                            email: user.email
+                            email: user.email,
+                            id: user.id
                         })
                         next()
                         return
@@ -43,12 +47,20 @@ io.of('/chat').on('connection', socket => {
     const user = clients.find(client => socket.id.includes(client.sid))
 
 
-    socket.on('message', (textMessage) => {
-        socket.broadcast.emit('message', {
-            text: textMessage,
-            name: user.name,
-            time: moment().format()
-        })
+    socket.on('message', async (textMessage) => {
+        try {
+            await MessageController.create({
+                user,
+                text: textMessage
+            })
+            socket.broadcast.emit('message', {
+                text: textMessage,
+                name: user.name,
+                time: moment().format()
+            })
+        } catch(err) {
+            console.log(err)
+        }
     })
 
     socket.on('disconnect', () => {

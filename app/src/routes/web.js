@@ -1,5 +1,6 @@
 const express = require('express')
 const userRouter = require('./userRouter')
+const messageRouter = require('./messageRouter')
 const errorHandlerMiddleware = require('./../middlewares/errorHandlerMiddleware')
 const authMiddleware = require('./../middlewares/authMiddleware')
 const cors = require('cors')
@@ -15,7 +16,8 @@ routes.use(cors())
 routes.use(authMiddleware)
 
 // routes here...
-apiRouter.use('/user', userRouter)
+apiRouter.use('/users', userRouter)
+apiRouter.use('/messages', messageRouter)
 
 
 routes.use('/api', apiRouter)
