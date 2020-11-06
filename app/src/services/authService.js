@@ -5,6 +5,7 @@ const redis = require('./../config/redis')
 const mailer = require('./../config/mail')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const isObjectEmpty = require('./../utils/isObjectEmpty')
 
 
 class AuthService {
@@ -18,7 +19,7 @@ class AuthService {
                 }
             }
         })
-        return !!user
+        return !isObjectEmpty(user)
     }
     async isUserConfirmed(email) {
         let user = await User.findOne({
@@ -94,16 +95,21 @@ class AuthService {
         return response
     }
 
-    async createToken(name, password) {
+    async createToken(email, password) {
         let response
         let user = await User.findOne({
-            where: {name}
+            where: {email}
         })
-        if(await bcrypt.compare(password, user.password)) {
-            const token = jwt.sign({id: user.id}, process.env.APP_SECRET_KEY)
-            response = {code: 200, token}
+
+        if(!isObjectEmpty(user)) {
+            if (await bcrypt.compare(password, user.password)) {
+                const token = jwt.sign({id: user.id}, process.env.APP_SECRET_KEY)
+                response = {code: 200, token}
+            } else {
+                response = {code: 400, error: 'Passwords dont match'}
+            }
         } else {
-            response = {code: 400, error: 'Passwords dont match'}
+            response = {code: 400, error: 'User doesnt exist'}
         }
         return response
     }

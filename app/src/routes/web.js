@@ -5,7 +5,7 @@ const authMiddleware = require('./../middlewares/authMiddleware')
 const cors = require('cors')
 require('dotenv').config()
 
-// initializing app wia express
+// initializing app with express
 const routes = express()
 routes.use(express.json())
 const apiRouter = express.Router()

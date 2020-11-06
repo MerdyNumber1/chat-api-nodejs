@@ -2,6 +2,7 @@ const User = require('./../models/user')
 const { Op } = require("sequelize");
 const Validator = require('validatorjs')
 const Service = require('./../services/authService')
+const isObjectEmpty = require('./../utils/isObjectEmpty')
 
 const AuthService = new Service()
 
@@ -54,21 +55,34 @@ class UserController {
     }
 
     async auth(req, res) {
-        const {name, password} = req.body
+        const {email, password} = req.body
 
         const isValid = new Validator({
-            name,
+            email,
             password
         }, {
-            'name': 'required|min:3|max:16',
+            'email': 'required|email',
             'password': 'required|min:6|max:32'
         })
 
         if(isValid.passes()) {
-            let response = await AuthService.createToken(name, password)
+            let response = await AuthService.createToken(email, password)
             res.status(response.code).json(response)
         } else { // send validation errors
             res.status(400).json(isValid.errors)
+        }
+    }
+
+    getCurrent(req, res) {
+        if(!isObjectEmpty(req.user)) {
+            res.status(200).json({
+                email: req.user.email,
+                name: req.user.name
+            })
+        } else {
+            res.status(401).json({
+                error: 'Auth error'
+            })
         }
     }
 }
