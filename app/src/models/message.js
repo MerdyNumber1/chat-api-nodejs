@@ -1,5 +1,6 @@
 const sequelize = require('./../database/database').sequelize
 const Sequelize = require('sequelize')
+const User = require('./user')
 
 const Message = sequelize.define("message", {
     id: {
@@ -14,5 +15,6 @@ const Message = sequelize.define("message", {
     },
 })
 
+Message.belongsTo(User)
 
 module.exports = Message

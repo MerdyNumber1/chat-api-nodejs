@@ -1,6 +1,5 @@
 const sequelize = require('./../database/database').sequelize
 const Sequelize = require('sequelize')
-const Message = require('./message')
 
 const User = sequelize.define("user", {
     id: {
@@ -26,7 +25,5 @@ const User = sequelize.define("user", {
         allowNull: false,
     }
 })
-
-User.hasMany(Message, {onDelete: 'cascade'})
 
 module.exports = User
