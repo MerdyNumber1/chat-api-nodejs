@@ -30,6 +30,7 @@ services:
       - ${APP_SOCKET_PORT}
     volumes:
       - ./app:/usr/local/src/app
+      - /usr/local/src/app/node_modules
     depends_on:
       - db
       - redis
