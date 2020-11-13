@@ -1,1 +1,4 @@
 .idea/
+.env
+containers/mysql/data
+containers/redis/data

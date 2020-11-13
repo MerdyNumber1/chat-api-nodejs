@@ -1,7 +1,35 @@
 version: "3.7"
 
 services:
+  db:
+    image: mysql:latest
+    volumes:
+      - ./containers/mysql/data:/var/lib/mysql
+    restart: always
+    ports:
+      - ${DB_PORT}:3306
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+  redis:
+    image: redis:alpine
+    command: redis-server
+    ports:
+      - ${REDIS_PORT}:6379
+    volumes:
+      - ./containers/redis/data:/var/lib/redis
+    environment:
+      - REDIS_REPLICATION_MODE=master
   node:
     build: ./app
+    restart: always
+    ports:
+      - ${APP_PORT}
+      - ${APP_SOCKET_PORT}
     volumes:
-    - ./app:.
+      - ./app:/usr/local/src/app
+    depends_on:
+      - db
+      - redis
