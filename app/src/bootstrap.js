@@ -1,10 +1,11 @@
 //database
 require('./database/database')
 
+const host = '0.0.0.0'
 //socket
 const socket = require('./routes/socket')
-socket.listen(process.env.APP_SOCKET_PORT, () => {
-    console.log(`Socket server started at http://localhost:${process.env.APP_SOCKET_PORT}`)
+socket.listen(process.env.APP_SOCKET_PORT, host, () => {
+    console.log(`Socket server started at http://${host}:${process.env.APP_SOCKET_PORT}`)
 })
 
 
@@ -12,6 +13,6 @@ socket.listen(process.env.APP_SOCKET_PORT, () => {
 const routes = require('./routes/web').routes
 require('dotenv').config()
 
-routes.listen(process.env.APP_PORT, () => {
-    console.log(`Node.js server started at http://localhost:${process.env.APP_PORT}`)
+routes.listen(process.env.APP_PORT, host,() => {
+    console.log(`Node.js server started at http://${host}:${process.env.APP_PORT}`)
 })
