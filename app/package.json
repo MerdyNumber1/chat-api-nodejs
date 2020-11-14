@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "serve": "nodemon src/",
+    "serve": "nodemon src/ --legacy-watch",
     "migrate": "node src/database/migration"
   },
   "dependencies": {
