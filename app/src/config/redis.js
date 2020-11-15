@@ -9,11 +9,7 @@ const client = redis.createClient({
 
 client.on('error', (error) => console.error(error))
 
-const asyncGet = promisify(client.get).bind(client)
-const asyncSet = promisify(client.set).bind(client)
+client.asyncGet = promisify(client.get).bind(client)
+client.asyncSet = promisify(client.set).bind(client)
 
-module.exports = {
-    client,
-    asyncGet,
-    asyncSet
-}
+module.exports = client

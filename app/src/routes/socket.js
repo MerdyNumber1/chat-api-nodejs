@@ -4,51 +4,23 @@ const jwt = require('jsonwebtoken')
 const User = require('./../models/user')
 const moment = require('moment')
 const Controller = require('./../controllers/messageController')
+const {authSocketMiddleware} = require('./../middlewares/authMiddleware')
+const redis = require('./../config/redis')
 
 const MessageController = new Controller()
 
-const clients = []
 
-io.use(async (socket, next) => {
-    socket.user = null
-    if(socket.handshake.query['token']) {
-        await jwt.verify(
-            socket.handshake.query['token'],
-            process.env.APP_SECRET_KEY,
-            async (err, payload) => {
-                if (payload) {
-                    let user = await User.findByPk(payload.id)
-                    if (user) {
-                        clients.push({
-                            sid: socket.id,
-                            name: user.name,
-                            email: user.email,
-                            id: user.id
-                        })
-                        next()
-                        return
-                    }
-                }
-                console.log(2)
-                socket.emit('authError', 'Authentication error')
-                socket.disconnect()
-            }
-        )
-    } else {
-        console.log(3)
-        socket.emit('authError', 'Authentication error')
-        socket.disconnect()
-    }
-})
+io.of('chat').use(authSocketMiddleware)
 
-io.of('/chat').on('connection', socket => {
+io.of('chat').on('connection', async socket => {
     console.log('connected')
 
-    const user = clients.find(client => socket.id.includes(client.sid))
+    try {
 
+        const user = JSON.parse(await redis.asyncGet(`clients:${socket.id}`))
 
-    socket.on('message', async (textMessage) => {
-        try {
+        socket.on('message', async (textMessage) => {
+            //console.log(textMessage)
             await MessageController.create({
                 user,
                 text: textMessage
@@ -58,15 +30,22 @@ io.of('/chat').on('connection', socket => {
                 name: user.name,
                 time: moment().format()
             })
-        } catch(err) {
-            console.log(err)
-        }
-    })
+        })
 
-    socket.on('disconnect', () => {
-        clients.splice(clients.indexOf(socket.id), 1)
-        console.log(`Client with id ${socket.id} disconnected`)
-    })
+        socket.on('disconnect', () => {
+            redis.del(`clients:${socket.id}`)
+            console.log(`Client with id ${socket.id} disconnected`)
+        })
+
+    } catch(e) {
+        if(e.message === 'Auth Error') {
+            socket.emit('authError', 'Authentication error')
+            socket.disconnect()
+        } else {
+            socket.emit('serverError', 'An error occurred on the server')
+            socket.disconnect()
+        }
+    }
 })
 
 module.exports = server

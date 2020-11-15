@@ -1,8 +1,6 @@
-function isObjectEmpty(obj) {
-    for (let key in obj) {
-        return false
-    }
-    return true
-}
+const isObjectEmpty = obj =>
+    !obj ||
+    (typeof obj === 'object' &&
+    Object.keys(obj).length === 0)
 
 module.exports = isObjectEmpty
