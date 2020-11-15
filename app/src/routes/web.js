@@ -2,7 +2,7 @@ const express = require('express')
 const userRouter = require('./userRouter')
 const messageRouter = require('./messageRouter')
 const errorHandlerMiddleware = require('./../middlewares/errorHandlerMiddleware')
-const authMiddleware = require('./../middlewares/authMiddleware')
+const {authMiddleware} = require('./../middlewares/authMiddleware')
 const cors = require('cors')
 require('dotenv').config()
 

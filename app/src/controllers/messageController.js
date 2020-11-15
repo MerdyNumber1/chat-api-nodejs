@@ -16,14 +16,16 @@ class MessageController {
                     model: User,
                     attributes: ['name']
                 }
+            ],
+            order: [
+                ['id', 'DESC']
             ]
         })
-        res.status(200).json(messages)
+        res.status(200).json(messages.reverse())
     }
 
     async create(payload) {
         if(!isObjectEmpty(payload.user)) {
-            console.log(payload.user.id)
             return await Message.create({
                 text: payload.text,
                 userId: payload.user.id
