@@ -3,12 +3,14 @@ const userRouter = express.Router()
 const Controller = require('./../controllers/userController')
 const rateLimit = require("express-rate-limit")
 const isObjectEmpty = require('./../utils/isObjectEmpty')
+require('dotenv').config()
+
 
 const UserController = new Controller()
 
 //middlewares
 userRouter.use(rateLimit({
-    max: 10
+    max: process.env.APP_MAX_AUTH_REQUESTS_PER_MINUTE
 }))
 
 function noAuthMiddleware(req, res, next)  {

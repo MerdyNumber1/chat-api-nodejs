@@ -1,11 +1,10 @@
 const server = require('http').createServer()
 const io = require('socket.io')(server)
-const jwt = require('jsonwebtoken')
-const User = require('./../models/user')
 const moment = require('moment')
 const Controller = require('./../controllers/messageController')
 const {authSocketMiddleware} = require('./../middlewares/authMiddleware')
 const redis = require('./../config/redis')
+const rateLimitSocketMiddleware = require('./../middlewares/rateLimitSocketMiddleware')
 
 const MessageController = new Controller()
 
@@ -20,16 +19,17 @@ io.of('chat').on('connection', async socket => {
         const user = JSON.parse(await redis.asyncGet(`clients:${socket.id}`))
 
         socket.on('message', async (textMessage) => {
-            //console.log(textMessage)
-            await MessageController.create({
-                user,
-                text: textMessage
-            })
-            socket.broadcast.emit('message', {
-                text: textMessage,
-                name: user.name,
-                time: moment().format()
-            })
+            if(await rateLimitSocketMiddleware(socket.id, user, 'clients', socket)) {
+                await MessageController.create({
+                    user,
+                    text: textMessage
+                })
+                socket.broadcast.emit('message', {
+                    text: textMessage,
+                    name: user.name,
+                    time: moment().format()
+                })
+            }
         })
 
         socket.on('disconnect', () => {

@@ -37,7 +37,9 @@ async function authSocketMiddleware(socket, next) {
                             sid: socket.id,
                             name: user.name,
                             email: user.email,
-                            id: user.id
+                            id: user.id,
+                            rateCount: 0,
+                            rateClear: new Date()
                         }))
                         next()
                         return
