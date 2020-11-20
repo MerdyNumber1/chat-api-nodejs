@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "serve": "nodemon src/ --legacy-watch",
+    "production": "node /src",
     "migrate": "node src/database/migration"
   },
   "dependencies": {
