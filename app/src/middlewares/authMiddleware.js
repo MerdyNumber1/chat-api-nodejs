@@ -10,7 +10,12 @@ async function authMiddleware(req, res, next) {
             process.env.APP_SECRET_KEY,
             async (err, payload) => {
                 if (payload) {
-                    let user = await User.findByPk(payload.id)
+                    let user = await User.findOne({
+                        where: {
+                            id: payload.id,
+                            confirmed: true
+                        }
+                    })
                     if (!isObjectEmpty(user)) {
                         req.user = {
                             email: user.email,
@@ -31,7 +36,12 @@ async function authSocketMiddleware(socket, next) {
             process.env.APP_SECRET_KEY,
             async (err, payload) => {
                 if (payload) {
-                    let user = await User.findByPk(payload.id)
+                    let user = await User.findOne({
+                        where: {
+                            id: payload.id,
+                            confirmed: true
+                        }
+                    })
                     if (user) {
                         redis.set(`clients:${socket.id}`, JSON.stringify({
                             sid: socket.id,

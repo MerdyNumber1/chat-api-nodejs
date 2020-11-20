@@ -96,7 +96,10 @@ class AuthService {
     async createToken(email, password) {
         let response
         let user = await User.findOne({
-            where: {email}
+            where: {
+                email,
+                confirmed: true
+            }
         })
 
         if(user) {
