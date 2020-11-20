@@ -24,7 +24,7 @@ io.of('chat').on('connection', async socket => {
                     user,
                     text: textMessage
                 })
-                socket.broadcast.emit('message', {
+                io.of('chat').emit('message', {
                     text: textMessage,
                     name: user.name,
                     time: moment().format()

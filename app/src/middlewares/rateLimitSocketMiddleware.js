@@ -2,15 +2,16 @@ const redis = require('./../config/redis')
 require('dotenv').config()
 
 async function rateLimitSocketMiddleware(sid, user, collection, connection) {
-    let userData = await redis.asyncGet(`${collection}:${sid}`)
+    let userData = JSON.parse(await redis.asyncGet(`${collection}:${sid}`))
+
     let rateCount = ++(userData).rateCount
     let {rateClear} = userData
+
     if(Math.abs(new Date() - rateClear) > 60000) {
         rateClear = new Date()
     } else {
         if(rateCount > process.env.APP_MAX_SEND_MESSAGE_REQUESTS_PER_MINUTE) {
-            connection.emit('FloodError', 'Too many requests')
-            connection.disconnect()
+            connection.emit('floodError', 'Too many requests')
             return false
         }
     }
